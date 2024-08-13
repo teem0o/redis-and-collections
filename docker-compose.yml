@@ -1,0 +1,43 @@
+version: '3.3'
+services:
+  redis-node1:
+    image: redis:latest
+    command: >
+      sh -c "
+        redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+        && redis-cli --cluster create redis-node1:6379 redis-node2:6379 redis-node3:6379 --cluster-replicas 0"
+    ports:
+      - "7000:6379"
+    volumes:
+      - redis-data-node1:/data
+    networks:
+      - redis-cluster-network
+
+  redis-node2:
+    image: redis:latest
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+    ports:
+      - "7001:6379"
+    volumes:
+      - redis-data-node2:/data
+    networks:
+      - redis-cluster-network
+
+  redis-node3:
+    image: redis:latest
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+    ports:
+      - "7002:6379"
+    volumes:
+      - redis-data-node3:/data
+    networks:
+      - redis-cluster-network
+
+networks:
+  redis-cluster-network:
+    driver: bridge
+
+volumes:
+  redis-data-node1:
+  redis-data-node2:
+  redis-data-node3:
